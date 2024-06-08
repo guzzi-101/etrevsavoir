@@ -229,9 +229,10 @@ const verbs = [
 
 ];
 
-let currentQuestion = {};
+let currentQuestionIndex = 0;
 let score = 0;
 let totalQuestions = 0;
+let shuffledVerbs = [];
 
 const questionElement = document.getElementById('question');
 const responseElement = document.getElementById('response');
@@ -243,15 +244,29 @@ document.getElementById('avoir-btn').addEventListener('click', () => checkAnswer
 function startQuiz() {
     score = 0;
     totalQuestions = 0;
+    shuffledVerbs = shuffleArray([...verbs]);
+    currentQuestionIndex = 0;
     nextQuestion();
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 function nextQuestion() {
     responseElement.textContent = '';
     responseElement.className = '';
-    const randomIndex = Math.floor(Math.random() * verbs.length);
-    currentQuestion = verbs[randomIndex];
+    if (currentQuestionIndex >= shuffledVerbs.length) {
+        currentQuestionIndex = 0; // Reset if all questions have been used
+        shuffledVerbs = shuffleArray([...verbs]);
+    }
+    currentQuestion = shuffledVerbs[currentQuestionIndex];
     questionElement.textContent = `Which auxiliary verb is used with "${currentQuestion.verb}"?`;
+    currentQuestionIndex++;
     totalQuestions++;
     updateScore();
 }
@@ -270,7 +285,8 @@ function checkAnswer(answer) {
 }
 
 function updateScore() {
-    scoreElement.textContent = `Score: ${score}/${totalQuestions}`;
+    const percentage = ((score / totalQuestions) * 100).toFixed(2);
+    scoreElement.textContent = `Score: ${score}/${totalQuestions} (${percentage}%)`;
 }
 
 startQuiz();
